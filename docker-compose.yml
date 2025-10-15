@@ -45,7 +45,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.react
     container_name: chat-frontend
     ports:
       - "3000:3000"
