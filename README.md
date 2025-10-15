@@ -13,7 +13,7 @@ A FastAPI-based chat application with user authentication and conversation histo
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using Docker Compose
 
 1. **Run the setup script:**
 ```bash
