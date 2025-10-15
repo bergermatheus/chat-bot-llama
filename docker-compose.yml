@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: chat-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - chat-network
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: chat-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - DATABASE_URL=sqlite:///./chat_app.db
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
+      - PYTHONPATH=/app
+    volumes:
+      - ./app:/app/app
+      - fastapi_data:/app/data
+    working_dir: /app
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - chat-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chat-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - fastapi
+    restart: unless-stopped
+    networks:
+      - chat-network
+
+volumes:
+  ollama_data:
+  fastapi_data:
+
+networks:
+  chat-network:
+    driver: bridge
